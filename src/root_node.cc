@@ -30,8 +30,6 @@ RootNode::RootNode() : Node("root_node") {
   this->get_parameter("num_motors", num_motors_);
   this->get_parameter("joint_names", joint_names_);
 
-  RCLCPP_INFO(this->get_logger(), "Num motors: %d\n", num_motors_);
-
   // Update topic names conditionally
   std::string ls_topic = hfreq_ ? "/lowstate" : "/lf/lowstate";
   std::string odom_topic = hfreq_ ? "/odommodestate" : "/lf/odommodestate";
@@ -80,7 +78,6 @@ void RootNode::LowStateHandler(LowStateMsg::SharedPtr message) {
   jointstate_msg.header.stamp = this->now();
   for (int i = 0; i < num_motors_; ++i) {
     std::string joint_name = joint_names_[i];
-    RCLCPP_INFO(this->get_logger(), "%s\n", joint_name.c_str());
     jointstate_msg.name.push_back(joint_name);
     jointstate_msg.position.push_back(message->motor_state[i].q);
     jointstate_msg.velocity.push_back(message->motor_state[i].dq);
@@ -95,8 +92,8 @@ void RootNode::OdometryHandler(OdometryMsg::SharedPtr message) {
   tf_broadcaster_->sendTransform(tf);
 }
 
-TransformStamped RootNode::GenerateTransformMsg(
-    OdometryMsg::SharedPtr message) {
+TransformStamped
+RootNode::GenerateTransformMsg(OdometryMsg::SharedPtr message) {
   TransformStamped tf;
 
   tf.header.stamp = this->get_clock()->now();
@@ -115,4 +112,4 @@ TransformStamped RootNode::GenerateTransformMsg(
   return tf;
 }
 
-}  // namespace hurocore
+} // namespace hurocore
