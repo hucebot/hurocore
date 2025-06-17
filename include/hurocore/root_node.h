@@ -3,8 +3,7 @@
 #ifndef HUROCORE_ROOT_NODE_H_
 #define HUROCORE_ROOT_NODE_H_
 
-#include <hurocore/motor_crc_hg.h>
-#include <hurocore/msg/motor_mode.h>
+#include <hurocore/params.h>
 #include <tf2_ros/transform_broadcaster.h>
 
 #include <memory>
@@ -21,7 +20,7 @@
 
 namespace hurocore {
 class RootNode : public rclcpp::Node {
- public:
+public:
   using LowCmdMsg = unitree_hg::msg::LowCmd;
   using ImuStateMsg = unitree_hg::msg::IMUState;
   using MotorStateMsg = unitree_hg::msg::MotorState;
@@ -33,29 +32,20 @@ class RootNode : public rclcpp::Node {
 
   using TransformBroadcaster = tf2_ros::TransformBroadcaster;
 
-  RootNode();
+  RootNode(Params params);
 
- protected:
+protected:
   void LowStateHandler(LowStateMsg::SharedPtr message);
   void OdometryHandler(OdometryMsg::SharedPtr message);
   TransformStamped GenerateTransformMsg(OdometryMsg::SharedPtr message);
 
- protected:
-  bool hfreq_;
-  bool info_imu_;
-  bool info_motor_;
-  int num_motors_;
-  std::vector<std::string> joint_names_;
-
+protected:
+  Params params_;
   rclcpp::Publisher<JointStateMsg>::SharedPtr jointstate_pub_;
   rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::Subscription<LowStateMsg>::SharedPtr lowstate_sub_;
   rclcpp::Subscription<OdometryMsg>::SharedPtr odometry_sub_;
-
   std::shared_ptr<TransformBroadcaster> tf_broadcaster_;
-
-  double control_dt_ = 0.002;  // 2ms
-  int timer_dt = control_dt_ * 1000;
 };
-}  // namespace hurocore
-#endif  // HUROCORE_ROOT_NODE_H_
+} // namespace hurocore
+#endif // HUROCORE_ROOT_NODE_H_

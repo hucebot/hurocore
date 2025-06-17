@@ -41,24 +41,18 @@ set(
   src/motor_crc_hg.cc
 )
 
-add_executable(root src/root.cc ${SRCS})
-target_include_directories(root PUBLIC
+add_executable(g1 apps/g1.cc ${SRCS})
+target_include_directories(g1 PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include/${PROJECT_NAME}>)
-target_link_libraries(root "${cpp_typesupport_target}")
-ament_target_dependencies(root ${DEPENDENCY_LIST})
-target_compile_options(root PUBLIC "-Wall;-Wextra;-O3;")
-target_compile_features(root PUBLIC c_std_99 cxx_std_17)
+target_link_libraries(g1 "${cpp_typesupport_target}")
+ament_target_dependencies(g1 ${DEPENDENCY_LIST})
+target_compile_options(g1 PUBLIC "-Wall;-Wextra;-O3;")
+target_compile_features(g1 PUBLIC c_std_99 cxx_std_17)
 
 install(TARGETS
-  root
+  g1
   DESTINATION lib/${PROJECT_NAME}
-)
-
-# Install the config directory
-install(
-  DIRECTORY config
-  DESTINATION share/${PROJECT_NAME}
 )
 
 if(BUILD_TESTING)

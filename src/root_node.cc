@@ -17,22 +17,11 @@ using TransformStamped = RootNode::TransformStamped;
 
 using TransformBroadcaster = RootNode::TransformBroadcaster;
 
-RootNode::RootNode() : Node("root_node") {
-  this->declare_parameter("hfreq", true);
-  this->declare_parameter("info_imu", false);
-  this->declare_parameter("info_motor", false);
-  this->declare_parameter("num_motors", 0);
-  this->declare_parameter<std::vector<std::string>>("joint_names");
-
-  this->get_parameter("high_freq", hfreq_);
-  this->get_parameter("info_imu", info_imu_);
-  this->get_parameter("info_motor", info_motor_);
-  this->get_parameter("num_motors", num_motors_);
-  this->get_parameter("joint_names", joint_names_);
-
+RootNode::RootNode(Params params) : Node("root_node"), params_(params) {
   // Update topic names conditionally
-  std::string ls_topic = hfreq_ ? "/lowstate" : "/lf/lowstate";
-  std::string odom_topic = hfreq_ ? "/odommodestate" : "/lf/odommodestate";
+  std::string ls_topic = params_.high_freq ? "/lowstate" : "/lf/lowstate";
+  std::string odom_topic =
+      params_.high_freq ? "/odommodestate" : "/lf/odommodestate";
 
   // Initialize the transform broadcaster
   tf_broadcaster_ = std::make_unique<TransformBroadcaster>(*this);
@@ -50,7 +39,7 @@ RootNode::RootNode() : Node("root_node") {
 }
 
 void RootNode::LowStateHandler(LowStateMsg::SharedPtr message) {
-  if (info_imu_) {
+  if (params_.info_imu) {
     ImuStateMsg imu = message->imu_state;
     RCLCPP_INFO(this->get_logger(),
                 "Euler angle -- roll: %f; pitch: %f; yaw: %f", imu.rpy[0],
@@ -65,19 +54,19 @@ void RootNode::LowStateHandler(LowStateMsg::SharedPtr message) {
                 imu.accelerometer[0], imu.accelerometer[1],
                 imu.accelerometer[2]);
   }
-  if (info_motor_) {
-    for (int i = 0; i < num_motors_; i++) {
+  if (params_.info_motors) {
+    for (size_t i = 0; i < params_.n_motors; ++i) {
       MotorStateMsg motor = message->motor_state[i];
       RCLCPP_INFO(this->get_logger(),
-                  "Motor state -- num: %d; q: %f; dq: %f; ddq: %f; tau: %f", i,
+                  "Motor state -- num: %ld; q: %f; dq: %f; ddq: %f; tau: %f", i,
                   motor.q, motor.dq, motor.ddq, motor.tau_est);
     }
   }
 
   JointStateMsg jointstate_msg;
   jointstate_msg.header.stamp = this->now();
-  for (int i = 0; i < num_motors_; ++i) {
-    std::string joint_name = joint_names_[i];
+  for (size_t i = 0; i < params_.n_motors; ++i) {
+    std::string joint_name = params_.joint_names[i];
     jointstate_msg.name.push_back(joint_name);
     jointstate_msg.position.push_back(message->motor_state[i].q);
     jointstate_msg.velocity.push_back(message->motor_state[i].dq);
