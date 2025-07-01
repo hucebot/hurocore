@@ -27,13 +27,6 @@ set(
   tf2_ros
 )
 
-# Custom message types
-find_package(rosidl_default_generators REQUIRED)
-rosidl_generate_interfaces(${PROJECT_NAME}
-    "msg/MotorMode.msg"
-)
-rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} "rosidl_typesupport_cpp")
-
 # include_directories(include)
 set(
   SRCS
@@ -45,7 +38,6 @@ add_executable(g1 apps/g1.cc ${SRCS})
 target_include_directories(g1 PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include/${PROJECT_NAME}>)
-target_link_libraries(g1 "${cpp_typesupport_target}")
 ament_target_dependencies(g1 ${DEPENDENCY_LIST})
 target_compile_options(g1 PUBLIC "-Wall;-Wextra;-O3;")
 target_compile_features(g1 PUBLIC c_std_99 cxx_std_17)
@@ -53,6 +45,12 @@ target_compile_features(g1 PUBLIC c_std_99 cxx_std_17)
 install(TARGETS
   g1
   DESTINATION lib/${PROJECT_NAME}
+)
+
+# Install launch files.
+install(DIRECTORY
+  launch
+  DESTINATION share/${PROJECT_NAME}/
 )
 
 if(BUILD_TESTING)

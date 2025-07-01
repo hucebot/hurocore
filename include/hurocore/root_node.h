@@ -12,7 +12,7 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
-#include <tf2/LinearMath/Quaternion.hpp>
+#include <tf2/LinearMath/Quaternion.h>
 #include <unitree_go/msg/sport_mode_state.hpp>
 #include <unitree_hg/msg/low_cmd.hpp>
 #include <unitree_hg/msg/low_state.hpp>
