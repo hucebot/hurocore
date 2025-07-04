@@ -8,9 +8,9 @@ from launch_ros.actions import Node
 
 
 def generate_launch_description():
-
+    # HURoCore node
     core_node = Node(package="hurocore", executable="g1", name="g1")
-
+    # Livox Lidar Launch File
     lidar_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             PathJoinSubstitution(
